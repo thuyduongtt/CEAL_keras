@@ -6,7 +6,9 @@ from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping
 from keras.datasets import cifar10
 from keras.models import load_model
 from keras.utils import np_utils
-from keras_contrib.applications.resnet import ResNet18
+# from keras_contrib.applications.resnet import ResNet18
+# from classification_models.keras import Classifiers
+from classification_models.tfkeras import Classifiers
 from sklearn.model_selection import train_test_split
 
 
@@ -39,7 +41,13 @@ def initialize_model(x_initial, y_initial, x_test, y_test, n_classes):
     if os.path.exists(args.chkt_filename):
         model = load_model(args.chkt_filename)
     else:
-        model = ResNet18((x_initial[-1,].shape), n_classes)
+        print(x_initial[-1, ].shape)
+        # model = ResNet18((x_initial[-1,].shape), n_classes)
+        ResNet18, preprocess_input = Classifiers.get('resnet18')
+        model = ResNet18(x_initial[-1, ].shape, weights='imagenet')
+
+        print('model initialized')
+
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
         model.fit(x_initial, y_initial, validation_data=(x_test, y_test), batch_size=args.batch_size,
                   shuffle=True, epochs=args.epochs, verbose=args.verbose, callbacks=[checkpoint])
